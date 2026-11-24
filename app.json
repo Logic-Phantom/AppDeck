@@ -69,6 +69,17 @@
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "b650d068-301c-45f2-bf06-55d721c9de6b"
+      }
+    },
+    "owner": "lcm2"
   }
 }
