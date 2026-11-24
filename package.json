@@ -63,5 +63,12 @@
       "^@/assets/(.*)$": "<rootDir>/assets/$1",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
+  },
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "react-native-gesture-handler"
+      ]
+    }
   }
 }

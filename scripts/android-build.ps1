@@ -8,7 +8,9 @@
 # 경로는 APPDECK_JAVA_HOME / APPDECK_ANDROID_HOME / APPDECK_GRADLE_HOME 로 덮어쓸 수 있다.
 param(
   [string]$Task = "assembleDebug",
-  [string]$Architectures = "arm64-v8a"
+  [string]$Architectures = "arm64-v8a",
+  # CMake 최소값 128 (128 미만이면 Expo가 무시하고 1024를 씀)
+  [int]$ObjectPathMax = 128
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,8 +20,8 @@ function Pick([string]$override, [string]$fallback) {
   if ($override) { return $override } else { return $fallback }
 }
 
-$env:JAVA_HOME = Pick $env:APPDECK_JAVA_HOME "C:\Program Files\Microsoft\jdk-17"
-$env:ANDROID_HOME = Pick $env:APPDECK_ANDROID_HOME "$env:LOCALAPPDATA\Android\Sdk"
+$env:JAVA_HOME = Pick $env:APPDECK_JAVA_HOME "C:\Android\jdk-17"
+$env:ANDROID_HOME = Pick $env:APPDECK_ANDROID_HOME "C:\Android\Sdk"
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 if ($env:APPDECK_GRADLE_HOME) { $env:GRADLE_USER_HOME = $env:APPDECK_GRADLE_HOME }
 # 사용자 폴더(또는 프로젝트 경로)에 한글이 있으면 일부 Gradle/CMake 단계가 깨질 수 있어 ASCII 임시 폴더를 쓴다.
@@ -38,7 +40,9 @@ if (-not (Test-Path (Join-Path $root "android\gradlew.bat"))) {
 
 Push-Location (Join-Path $root "android")
 try {
-  & .\gradlew.bat $Task "-PreactNativeArchitectures=$Architectures" --console=plain --no-daemon
+  # Windows 260자 경로 제한: CMake 객체 경로가 길면 해시로 줄인다.
+  # 한글 등 비ASCII 경로에서는 Gradle이 node_modules 경로를 깨뜨리므로 C:\dev\AppDeck 같은 ASCII 경로에서 빌드한다.
+  & .\gradlew.bat $Task "-PreactNativeArchitectures=$Architectures" "-Pexpo.android.cmakeObjectPathMax=$ObjectPathMax" --console=plain --no-daemon
   exit $LASTEXITCODE
 } finally {
   Pop-Location
