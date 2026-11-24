@@ -1,0 +1,9 @@
+{
+  "name": "appdeck-device-apps",
+  "version": "0.1.0",
+  "description": "APPDECK Android 설치 앱 카탈로그/실행 로컬 Expo 모듈 (iOS는 전체 앱 열거 API가 없어 미구현)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "license": "MIT"
+}

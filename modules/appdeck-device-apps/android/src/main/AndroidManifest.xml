@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools">
+  <!--
+    설치 앱 검색·분류·실행이 앱의 핵심 목적이므로 전체 패키지 가시성을 선언한다.
+    Google Play 제출 시 Permissions Declaration Form 승인이 필요하다(docs/PLAY_POLICY_ELIGIBILITY.md).
+    승인되지 않으면 이 줄을 제거하고 아래 <queries> 런처 인텐트 범위만으로 동작한다.
+  -->
+  <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+    tools:ignore="QueryAllPackagesPermission" />
+  <!-- 사용 기록(선택 기능, 기본 OFF). 시스템 설정에서 사용자가 직접 허용해야 한다. -->
+  <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+    tools:ignore="ProtectedPermissions" />
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.MAIN" />
+      <category android:name="android.intent.category.LAUNCHER" />
+    </intent>
+  </queries>
+</manifest>

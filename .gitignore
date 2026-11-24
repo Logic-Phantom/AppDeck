@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native (prebuild 생성물)
+/ios
+/android
+.kotlin/
+*.orig.*
+
+# 서명/비밀값 — 절대 커밋 금지
+*.jks
+*.keystore
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+.env
+.env*.local
+credentials.json
+
+# 빌드 산출물/로그
+*.apk
+*.aab
+.build-*.log
+npm-debug.*
+*.tsbuildinfo
+.metro-health-check*
+.DS_Store
+
+# 로컬 설정
+.claude/settings.local.json
