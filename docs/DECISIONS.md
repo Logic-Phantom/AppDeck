@@ -31,5 +31,13 @@
 ## ADR-007 레퍼런스에서 아이콘 추출
 홈의 목적 아이콘 6종과 반짝이 아이콘은 `scripts/extract-reference-icons.mjs`로 레퍼런스 이미지에서 잘라 배경을 투명 처리해 사용한다. 라인 아이콘(탭바·설정 등)과 정리 완료 일러스트는 원본 해상도가 낮아 SVG로 재현했다.
 
+## ADR-009 Android 빌드는 EAS 클라우드 (Windows 로컬은 보조)
+작업 PC 경로에 한글이 있고 Windows 긴 경로 지원이 꺼져 있어 로컬 Gradle/CMake 빌드가 실패한다.
+`eas build -p android --profile preview` (APK, EAS 관리 서명 키)를 기본 경로로 쓴다.
+로컬 빌드가 필요하면 ASCII 짧은 경로(예: `C:\ad`)에 복제하고 Windows `LongPathsEnabled=1`을 켠 뒤 `scripts/android-build.ps1`을 사용한다.
+
+## ADR-010 react-native-gesture-handler 자동 링크 제외
+앱덱은 제스처 핸들러를 쓰지 않는다(전이 의존성). 네이티브 코드량과 경로 길이 문제를 줄이려고 구도픽과 같이 `expo.autolinking.exclude`로 제외했다.
+
 ## ADR-008 주차 위치 메모
 레퍼런스의 "주차 위치" 화면을 위치 권한 없이 구현: 사용자가 입력한 층/구역 문구, 시스템 사진 선택기로 고른 사진, 직접 입력한 요금 규칙만 저장한다.

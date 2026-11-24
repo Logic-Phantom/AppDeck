@@ -41,10 +41,14 @@ Expo SDK 58 · React Native 0.88 · React 19.3 · Expo Router · TypeScript stri
 ```bash
 npm install
 npm run web          # 웹 미리보기 (가상 데이터)
+
+# Android APK (권장: EAS 클라우드 빌드, 프로젝트 @lcm2/appdeck)
+npx eas-cli build -p android --profile preview      # 설치용 APK
+npx eas-cli build -p android --profile production   # 스토어용 AAB
+
+# 로컬 빌드 (ASCII 짧은 경로 + Windows 긴 경로 지원 필요, docs/DECISIONS.md ADR-009)
 npx expo prebuild --platform android
-npm run android      # Android Development Build (JDK 17 + Android SDK 필요)
 npm run android:debug    # scripts/android-build.ps1 assembleDebug
-npm run android:release  # AAB (서명 설정 필요)
 ```
 
 ## Android 권한과 동의
@@ -69,7 +73,7 @@ npm run doctor
 최근 결과와 미검증 항목: [docs/TESTING.md](docs/TESTING.md)
 
 ## 미검증 / 남은 작업
-- Android 실기기·에뮬레이터 빌드 및 Kotlin 모듈 동작 (작업 PC에 JDK/Android SDK 없음)
+- Android 실기기 동작 검증 (APK는 EAS로 빌드 완료, 설치 앱 조회·실행·사용 기록은 기기에서 미확인)
 - iOS 실행 검증
 - 사용자 컬렉션(폴더), 백업 가져오기
 - Play Console 권한 선언, Data safety, 개인정보 처리방침 URL, 상표 검색
@@ -80,6 +84,14 @@ npm run doctor
 ---
 
 ## Work Log
+
+### 2026-11-24 — Android 빌드 환경 · EAS APK
+- 빌드 도구 설치: Microsoft OpenJDK 17(포터블, `C:\Android\jdk-17`), Android SDK(`C:\Android\Sdk`: platform-tools, platforms;android-37.0, build-tools 37.0.0, NDK 27.1, CMake 3.22.1), 공식 체크섬 확인
+- 로컬 Gradle 빌드 시도 → 한글 경로·Windows 260자 경로 제한으로 실패 (원인과 우회 방법을 docs/TESTING.md, ADR-009에 기록)
+- `react-native-gesture-handler` 자동 링크 제외(미사용), `scripts/android-build.ps1`에 CMake 객체 경로 축약 옵션 추가
+- EAS 프로젝트 `@lcm2/appdeck` 연결, `eas.json` preview(APK)/production(AAB) 프로필, EAS 관리 서명 키
+- **EAS preview 빌드 성공** → `appdeck-v0.1.0-preview.apk` (Kotlin 모듈 컴파일 통과, `QUERY_ALL_PACKAGES` 매니페스트 병합 확인)
+- 실기기 검증은 사용자가 별도로 진행 예정
 
 ### 2026-11-24 — v0.1.0 MVP 초기 구현
 - 기존 저장소(GudoPick·MoodMix·CutPick) 구조 분석 → Expo SDK 58 + `src/app` 라우팅 + domain/features/infrastructure/platform 분리 채택

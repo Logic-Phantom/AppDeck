@@ -18,8 +18,18 @@
 - 주차: 경과 시간 포맷, 일시정지 제외, 요금 올림 계산
 - SQLite 매핑: 왕복 보존, 잘못된 값 방어, 마이그레이션 컬럼
 
+## 2026-11-24 — Android 빌드
+
+| 항목 | 결과 |
+|---|---|
+| EAS Build `preview` (Android APK) | ✅ 성공 — 빌드 ID `62bf7b2f-950f-4e2f-a456-b012529c979c`, Kotlin 모듈 포함 컴파일 통과 |
+| APK 매니페스트 확인 (`aapt2 dump badging`) | ✅ `app.appdeck.mobile` v0.1.0(1), 라벨 "앱덱", compileSdk 37, 권한 `QUERY_ALL_PACKAGES`·`PACKAGE_USAGE_STATS`·`INTERNET`·`VIBRATE`·`ACCESS_NETWORK_STATE` |
+| 로컬 Windows Gradle 빌드 | ❌ 실패 — ① 한글 경로("바탕 화면")를 Gradle이 깨뜨림 → ASCII 경로 복제로 우회, ② CMake/Ninja 객체 경로가 260자 제한 초과(`react-native-safe-area-context` codegen, 269자). Windows `LongPathsEnabled=0` 환경에서는 해결 불가 → EAS 클라우드 빌드 사용 |
+
+> `INTERNET`·`ACCESS_NETWORK_STATE`는 Expo/React Native 기본 의존성이 추가한다. 앱 코드는 네트워크 요청을 하지 않는다(릴리스에서 제거 여부는 후속 검토).
+
 ## 미검증 (실행하지 않음)
-- ❌ **Android 실기기/에뮬레이터**: 이 PC에 JDK·Android SDK가 없어 `expo prebuild`/Gradle 빌드와 Kotlin 모듈 컴파일을 실행하지 못했다. 설치 앱 조회·아이콘 캐시·앱 실행·UsageStats는 **미검증**.
+- ❌ **Android 실기기 동작**: APK는 만들었지만 기기 설치·실행 검증은 사용자가 따로 진행한다. 설치 앱 조회·아이콘 캐시·앱 실행·UsageStats는 **미검증**.
 - ❌ iOS 시뮬레이터/실기기
 - ❌ 다크 모드 실기기 확인, TalkBack/VoiceOver
 - ❌ 수백 개 앱 성능 측정
