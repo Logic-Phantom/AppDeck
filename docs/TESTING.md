@@ -25,7 +25,8 @@
 | `npx tsc --noEmit` / `npx expo lint` | ✅ 오류 0 / 0건 |
 | `npx jest` | ✅ 58개 통과 (써브웨이·지하철·짧은 패턴 오분류 회귀 테스트 3개 추가) |
 | 웹 미리보기 | ✅ 음식점·카페 → 편집 → 앱 넣기(땡겨요) → `직접 넣은 앱` 표시 → 빼기 → 자동 분류로 되돌리기, 콘솔 오류 0 |
-| Android APK | ⏳ 이 변경은 아직 APK로 빌드하지 않음 |
+| EAS Build `preview` (Android APK) | ✅ 성공 — 빌드 ID `3b180d99-7adc-4cfd-b1ee-1ff6788c870e`, `app.appdeck.mobile` v0.1.0, `QUERY_ALL_PACKAGES` 포함, JS 번들에 카테고리 편집·규칙 v3 포함 확인 |
+| Android 실기기 | ⏳ 사용자가 별도로 검증 예정 |
 
 ## 2026-11-25 — 디자인 v2 · 카테고리 v2
 
