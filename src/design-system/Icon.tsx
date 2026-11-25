@@ -34,7 +34,22 @@ export type IconName =
   | 'eye-off'
   | 'won'
   | 'car'
-  | 'link';
+  | 'link'
+  | 'vault'
+  | 'vault-filled'
+  | 'gear'
+  | 'gear-filled'
+  | 'help'
+  | 'terms'
+  | 'shield'
+  | 'more'
+  | 'chevron-down'
+  | 'arrow-right';
+
+const GEAR =
+  'M10.3 3.6a1.8 1.8 0 0 1 3.4 0l.3.9a1.8 1.8 0 0 0 2.5 1l.9-.4a1.8 1.8 0 0 1 2.4 2.4l-.4.9a1.8 1.8 0 0 0 1 2.5l.9.3a1.8 1.8 0 0 1 0 3.4l-.9.3a1.8 1.8 0 0 0-1 2.5l.4.9a1.8 1.8 0 0 1-2.4 2.4l-.9-.4a1.8 1.8 0 0 0-2.5 1l-.3.9a1.8 1.8 0 0 1-3.4 0l-.3-.9a1.8 1.8 0 0 0-2.5-1l-.9.4a1.8 1.8 0 0 1-2.4-2.4l.4-.9a1.8 1.8 0 0 0-1-2.5l-.9-.3a1.8 1.8 0 0 1 0-3.4l.9-.3a1.8 1.8 0 0 0 1-2.5l-.4-.9a1.8 1.8 0 0 1 2.4-2.4l.9.4a1.8 1.8 0 0 0 2.5-1z';
+const VAULT =
+  'M8.2 4a4.2 4.2 0 0 1 3.8 2.4A4.2 4.2 0 1 1 17.6 12a4.2 4.2 0 1 1-5.6 5.6A4.2 4.2 0 1 1 6.4 12 4.2 4.2 0 0 1 8.2 4z';
 
 interface Props {
   name: IconName;
@@ -50,6 +65,69 @@ export function Icon({ name, size = 22, color, strokeWidth = 1.7, holeColor = "#
   const p = { stroke: color, strokeWidth, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
   const body = (() => {
     switch (name) {
+      case 'vault':
+        return (
+          <>
+            <Path {...p} d={VAULT} />
+            <Circle {...p} cx={12} cy={12} r={1.6} />
+          </>
+        );
+      case 'vault-filled':
+        return (
+          <>
+            <Path d={VAULT} fill={color} />
+            <Circle cx={12} cy={12} r={2} fill={holeColor} />
+          </>
+        );
+      case 'gear':
+        return (
+          <>
+            <Path {...p} d={GEAR} />
+            <Circle {...p} cx={12} cy={12} r={3} />
+          </>
+        );
+      case 'gear-filled':
+        return (
+          <>
+            <Path d={GEAR} fill={color} />
+            <Circle cx={12} cy={12} r={3} fill={holeColor} />
+          </>
+        );
+      case 'help':
+        return (
+          <>
+            <Path {...p} d="M12 20.5a8.5 8.5 0 1 0-7.6-4.7L3.5 20.5l4.7-.9a8.5 8.5 0 0 0 3.8.9z" />
+            <Path {...p} d="M9.8 9.6a2.3 2.3 0 0 1 4.4.9c0 1.5-2.2 1.9-2.2 3.2" />
+            <Circle cx={12} cy={16.4} r={0.9} fill={color} />
+          </>
+        );
+      case 'terms':
+        return (
+          <>
+            <Path {...p} d="M6 20.5V5a1.5 1.5 0 0 1 1.5-1.5h7L18.5 7.5V11" />
+            <Circle {...p} cx={14.5} cy={14} r={2.6} />
+            <Path {...p} d="M10 20.5c.5-2.2 2.3-3.6 4.5-3.6s4 1.4 4.5 3.6M9 8h4" />
+          </>
+        );
+      case 'shield':
+        return (
+          <>
+            <Path {...p} d="M12 3.5 19 6v5.6c0 4.3-3 7.6-7 8.9-4-1.3-7-4.6-7-8.9V6z" />
+            <Path {...p} d="M9.5 12.2l1.8 1.8 3.4-3.6" />
+          </>
+        );
+      case 'more':
+        return (
+          <>
+            <Circle cx={5.5} cy={12} r={1.5} fill={color} />
+            <Circle cx={12} cy={12} r={1.5} fill={color} />
+            <Circle cx={18.5} cy={12} r={1.5} fill={color} />
+          </>
+        );
+      case 'chevron-down':
+        return <Path {...p} d="M6 9.5l6 6 6-6" />;
+      case 'arrow-right':
+        return <Path {...p} d="M5 12h14M13 6l6 6-6 6" />;
       case 'home':
         return <Path {...p} d="M4 10.2 12 4l8 6.2V19a1.5 1.5 0 0 1-1.5 1.5H15v-5.2h-6v5.2H5.5A1.5 1.5 0 0 1 4 19z" />;
       case 'home-filled':

@@ -1,4 +1,4 @@
-// 앱 아이콘/스플래시/파비콘을 SVG 브랜드 마크로부터 생성한다. 사용: npm run assets:build
+// 앱 아이콘/스플래시/파비콘을 v2 브랜드 마크(블루→바이올렛 Λ)로 생성한다. 사용: npm run assets:build
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,29 +9,44 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(root, 'assets/brand');
 mkdirSync(out, { recursive: true });
 
-const MARK =
-  'M20.6 7.6a3.9 3.9 0 0 1 6.8 0l15.3 27.6a2.6 2.6 0 0 1-2.3 3.9h-6.2a2.6 2.6 0 0 1-2.3-1.4L24 21.4l-7.9 16.3a2.6 2.6 0 0 1-2.3 1.4H7.6a2.6 2.6 0 0 1-2.3-3.9z';
+/** src/design-system/brand.tsx BrandMark와 같은 도형 (viewBox 0 0 100 100) */
+function markGroup(mono) {
+  if (mono) {
+    return (
+      '<path d="M50 22 L78 76" stroke="#000" stroke-width="21" stroke-linecap="round"/>' +
+      '<path d="M50 22 L22 76" stroke="#000" stroke-width="21" stroke-linecap="round"/>'
+    );
+  }
+  return (
+    '<defs>' +
+    '<linearGradient id="r" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#3A74F2"/><stop offset="0.7" stop-color="#3F50E6"/><stop offset="1" stop-color="#8A5CF6"/></linearGradient>' +
+    '<linearGradient id="l" x1="0.6" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#7CC0FF"/><stop offset="0.45" stop-color="#3D86F7"/><stop offset="1" stop-color="#2457E8"/></linearGradient>' +
+    '</defs>' +
+    '<path d="M50 22 L78 76" stroke="url(#r)" stroke-width="21" stroke-linecap="round"/>' +
+    '<path d="M50 22 L22 76" stroke="url(#l)" stroke-width="21" stroke-linecap="round"/>'
+  );
+}
 
-/** 브랜드 마크를 size 캔버스 중앙에 scale 비율로 그린 SVG */
-function markSvg({ size, scale, fg, bg, radius = 0 }) {
-  const markSize = size * scale;
-  const offset = (size - markSize) / 2;
+/** 마크를 size 캔버스 중앙에 scale 비율로 배치 */
+function svg({ size, scale, bg, radius = 0, mono = false }) {
+  const mark = size * scale;
+  const off = (size - mark) / 2;
   const bgRect = bg ? `<rect width="${size}" height="${size}" rx="${radius}" fill="${bg}"/>` : '';
   return Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${bgRect}` +
-      `<g transform="translate(${offset} ${offset + markSize * 0.03}) scale(${markSize / 48})"><path d="${MARK}" fill="${fg}"/></g></svg>`,
+      `<g transform="translate(${off} ${off}) scale(${mark / 100})">${markGroup(mono)}</g></svg>`,
   );
 }
 
 const jobs = [
-  ['icon.png', markSvg({ size: 1024, scale: 0.58, fg: '#111317', bg: '#FFFFFF' })],
-  ['android-icon-foreground.png', markSvg({ size: 1024, scale: 0.4, fg: '#111317' })],
-  ['android-icon-monochrome.png', markSvg({ size: 1024, scale: 0.4, fg: '#000000' })],
-  ['splash-icon.png', markSvg({ size: 512, scale: 0.6, fg: '#111317', bg: '#FFFFFF', radius: 140 })],
-  ['favicon.png', markSvg({ size: 64, scale: 0.7, fg: '#111317', bg: '#FFFFFF', radius: 16 })],
+  ['icon.png', svg({ size: 1024, scale: 0.74, bg: '#FFFFFF' })],
+  ['android-icon-foreground.png', svg({ size: 1024, scale: 0.52 })],
+  ['android-icon-monochrome.png', svg({ size: 1024, scale: 0.52, mono: true })],
+  ['splash-icon.png', svg({ size: 512, scale: 0.78 })],
+  ['favicon.png', svg({ size: 64, scale: 0.86, bg: '#FFFFFF', radius: 16 })],
 ];
 
-for (const [name, svg] of jobs) {
-  await sharp(svg).png().toFile(path.join(out, name));
+for (const [name, data] of jobs) {
+  await sharp(data).png().toFile(path.join(out, name));
   console.log('saved assets/brand/' + name);
 }

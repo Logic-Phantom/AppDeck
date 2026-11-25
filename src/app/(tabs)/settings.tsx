@@ -1,31 +1,43 @@
 import Constants from 'expo-constants';
+import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, useColorScheme } from 'react-native';
 
 import { ConfirmDialog, type DialogAction } from '@/components/ConfirmDialog';
-import { Screen } from '@/components/Screen';
+import { Screen, TabTitle } from '@/components/Screen';
 import { SettingsRow } from '@/components/SettingsRow';
+import { Toggle } from '@/components/ui';
 import { Icon } from '@/design-system/Icon';
 import { useColors } from '@/design-system/theme';
-import { fonts, type } from '@/design-system/tokens';
+import { fonts } from '@/design-system/tokens';
 import { useAppDeck } from '@/features/app-data/AppDeckProvider';
 import { shareBackup } from '@/features/settings/export-data';
-import type { ThemePreference } from '@/infrastructure/storage/repository';
 
-const THEME_LABEL: Record<ThemePreference, string> = { system: '시스템 설정 따르기', light: '라이트', dark: '다크' };
-const NEXT_THEME: Record<ThemePreference, ThemePreference> = { system: 'light', light: 'dark', dark: 'system' };
+const SUPPORT_URL = 'https://github.com/Logic-Phantom/AppDeck/issues';
 
 type DialogKind = 'cache' | 'export' | 'reset' | null;
 
 export default function SettingsTab() {
   const c = useColors();
   const router = useRouter();
+  const system = useColorScheme();
   const { settings, updateSettings, capabilities, clearIconCache, clearAllData, exportData, showToast } = useAppDeck();
   const [dialog, setDialog] = useState<DialogKind>(null);
   const version = Constants.expoConfig?.version ?? '0.1.0';
+  const followSystem = settings.theme === 'system';
 
-  const usageLabel = !capabilities.canReadUsageStats ? '이 기기에서는 지원하지 않아요' : settings.usageStatsEnabled ? '켜짐' : '꺼짐 (선택 기능)';
+  const openSystemSettings = async () => {
+    if (Platform.OS === 'web') {
+      showToast('웹 미리보기에서는 시스템 설정을 열 수 없어요.');
+      return;
+    }
+    try {
+      await Linking.openSettings();
+    } catch {
+      showToast('시스템 설정을 열 수 없어요.');
+    }
+  };
 
   const dialogs: Record<Exclude<DialogKind, null>, { title: string; message: string; actions: DialogAction[] }> = {
     cache: {
@@ -72,34 +84,44 @@ export default function SettingsTab() {
 
   return (
     <Screen>
+      <TabTitle title="설정" icon={<Icon name="gear" size={25} color={c.icon} strokeWidth={2} />} />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.titleRow}>
-          <Icon name="settings" size={24} color={c.text} strokeWidth={2} />
-          <Text style={[type.title, { color: c.text }]} accessibilityRole="header">
-            설정
-          </Text>
-        </View>
 
-        <SettingsRow
-          icon="apps"
-          label="앱 목록 설정"
-          subtitle={capabilities.canEnumerateInstalledApps ? '시스템 앱 표시 · 다시 불러오기' : '직접 등록한 앱 관리'}
-          onPress={() => router.push('/settings-apps')}
-        />
+        <SettingsRow icon="bell" label="알림 설정" onPress={() => void openSystemSettings()} />
         <SettingsRow icon="lock" label="개인정보 보호" onPress={() => router.push('/privacy')} />
+        <SettingsRow
+          icon="clock"
+          label="앱 사용 기록"
+          subtitle={!capabilities.canReadUsageStats ? '이 기기에서는 지원하지 않아요' : settings.usageStatsEnabled ? '켜짐' : undefined}
+          onPress={capabilities.canReadUsageStats ? () => router.push('/usage-access') : () => showToast('이 기기에서는 앱 사용 기록을 읽을 수 없어요.')}
+        />
         <SettingsRow
           icon="theme"
           label="테마 설정"
-          subtitle={THEME_LABEL[settings.theme]}
-          onPress={() => void updateSettings({ theme: NEXT_THEME[settings.theme] })}
+          subtitle="시스템 설정 따르기"
+          right={<Toggle value={followSystem} />}
+          onPress={() => void updateSettings({ theme: followSystem ? (system === 'dark' ? 'dark' : 'light') : 'system' })}
         />
+        {!followSystem ? (
+          <SettingsRow
+            icon="theme"
+            label="화면 모드"
+            value={settings.theme === 'dark' ? '다크' : '라이트'}
+            onPress={() => void updateSettings({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
+          />
+        ) : null}
+        <SettingsRow icon="shield" label="앱 버전" value={`v${version}`} />
+        <SettingsRow icon="help" label="고객센터" onPress={() => void Linking.openURL(SUPPORT_URL)} />
+        <SettingsRow icon="terms" label="이용약관 및 개인정보처리방침" onPress={() => router.push('/privacy')} last />
+
+        <Text style={[styles.group, { color: c.textSecondary }]}>앱 관리</Text>
         <SettingsRow
-          icon="chart"
-          label="사용 기록 (선택)"
-          subtitle={usageLabel}
-          onPress={capabilities.canReadUsageStats ? () => router.push('/usage-access') : undefined}
+          icon="apps"
+          label="앱 목록 설정"
+          subtitle={capabilities.canEnumerateInstalledApps ? '시스템 앱 표시 · 다시 불러오기 · 숨긴 앱' : '직접 등록한 앱 관리'}
+          onPress={() => router.push('/settings-apps')}
         />
-        <SettingsRow icon="package" label="앱 버전" value={`v${version}`} last />
+        <SettingsRow icon="star" label="즐겨찾기 편집" onPress={() => router.push('/favorites')} last />
 
         <Text style={[styles.group, { color: c.textSecondary }]}>데이터 관리</Text>
         {capabilities.nativeModuleAvailable ? <SettingsRow icon="cache" label="캐시 삭제" onPress={() => setDialog('cache')} /> : null}
@@ -121,7 +143,6 @@ export default function SettingsTab() {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 20, paddingBottom: 32 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingTop: 18, paddingBottom: 14 },
-  group: { fontFamily: fonts.semibold, fontSize: 12.5, marginTop: 26, marginBottom: 2 },
+  content: { paddingHorizontal: 22, paddingBottom: 32 },
+  group: { fontFamily: fonts.bold, fontSize: 13, marginTop: 28, marginBottom: 2 },
 });

@@ -6,19 +6,19 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { AppIcon } from '@/components/AppIcon';
 import { Screen } from '@/components/Screen';
 import { SearchField } from '@/components/SearchField';
-import { EmptyState, PrimaryButton, SectionHeader } from '@/components/ui';
-import { PURPOSE_ICONS } from '@/design-system/purpose-icons';
+import { EmptyState, GlassCard, PrimaryButton, SectionHeader } from '@/components/ui';
+import { Icon } from '@/design-system/Icon';
+import { QUICK_ICONS, SUN_ICON } from '@/design-system/purpose-icons';
 import { useColors } from '@/design-system/theme';
 import { fonts, type } from '@/design-system/tokens';
 import { useAppDeck } from '@/features/app-data/AppDeckProvider';
 
-const PURPOSE_ROWS: { key: string; label: string; href: string }[] = [
-  { key: 'delivery', label: '배달 주문', href: '/results?intent=delivery' },
-  { key: 'directions', label: '길 찾기', href: '/results?intent=directions' },
-  { key: 'ott', label: 'OTT 보기', href: '/results?intent=ott' },
-  { key: 'shopping', label: '쇼핑하기', href: '/results?intent=shopping' },
-  { key: 'movie', label: '영화 예매', href: '/results?intent=movie' },
-  { key: 'cleanup', label: '앱 정리하기', href: '/cleanup' },
+const QUICK: { key: keyof typeof QUICK_ICONS; label: string; intent: string }[] = [
+  { key: 'delivery', label: '배달·주문', intent: 'delivery' },
+  { key: 'directions', label: '길찾기', intent: 'directions' },
+  { key: 'ott', label: 'OTT', intent: 'ott' },
+  { key: 'shopping', label: '쇼핑', intent: 'shopping' },
+  { key: 'transport', label: '교통·이동', intent: 'transport' },
 ];
 
 export default function HomeScreen() {
@@ -31,8 +31,7 @@ export default function HomeScreen() {
 
   const submit = () => {
     const q = query.trim();
-    if (!q) return;
-    router.push({ pathname: '/results', params: { q } });
+    if (q) router.push({ pathname: '/results', params: { q } });
   };
 
   return (
@@ -42,53 +41,50 @@ export default function HomeScreen() {
         keyboardShouldPersistTaps="handled"
         refreshControl={canScan ? <RefreshControl refreshing={scanning} onRefresh={refreshInventory} /> : undefined}
       >
-        <Text style={[type.greeting, styles.greeting, { color: c.text }]} accessibilityRole="header">
-          안녕하세요!{'\n'}오늘도 스마트한 하루 되세요 👋
+        <View style={styles.hello}>
+          <Image source={SUN_ICON} style={styles.sun} contentFit="contain" />
+          <Text style={[styles.helloText, { color: c.text }]}>오늘도 좋은 하루에요!</Text>
+        </View>
+        <Text style={[type.headline, styles.headline, { color: c.text }]} accessibilityRole="header">
+          필요한 앱을{'\n'}한 번에 찾아보세요
         </Text>
 
-        <SearchField
-          value={query}
-          onChangeText={setQuery}
-          onSubmit={submit}
-          placeholder="무엇을 하시나요?"
-          trailing={
-            canScan
-              ? { icon: 'scan', label: '설치된 앱 다시 확인', onPress: () => void refreshInventory() }
-              : { icon: 'scan', label: '검색', onPress: submit }
-          }
-        />
+        <SearchField value={query} onChangeText={setQuery} onSubmit={submit} placeholder="어떤 앱을 찾고 계세요?" />
 
-        <View style={styles.rows}>
-          {PURPOSE_ROWS.map((row) => (
-            <Pressable
-              key={row.key}
-              onPress={() => router.push(row.href as never)}
-              accessibilityRole="button"
-              accessibilityLabel={row.label}
-              style={({ pressed }) => [styles.row, { backgroundColor: pressed ? c.surfacePressed : c.surfaceMuted }]}
+        <View style={styles.grid}>
+          {QUICK.map((q) => (
+            <GlassCard
+              key={q.key}
+              style={styles.quick}
+              onPress={() => router.push({ pathname: '/results', params: { intent: q.intent } })}
+              accessibilityLabel={q.label}
             >
-              <Image source={PURPOSE_ICONS[row.key]} style={styles.rowIcon} contentFit="contain" />
-              <Text style={[type.body, { color: c.text }]}>{row.label}</Text>
-            </Pressable>
+              <Image source={QUICK_ICONS[q.key]} style={styles.quickIcon} contentFit="contain" />
+              <Text style={[styles.quickText, { color: c.text }]}>{q.label}</Text>
+            </GlassCard>
           ))}
+          <GlassCard style={[styles.quick, styles.quickMore]} onPress={() => router.push('/categories')} accessibilityLabel="카테고리 더보기">
+            <Text style={[styles.moreText, { color: c.text }]}>더보기</Text>
+            <Icon name="chevron-right" size={18} color={c.text} strokeWidth={2.2} />
+          </GlassCard>
         </View>
 
-        <View style={styles.shortcuts}>
-          <SectionHeader title="바로가기" actionLabel="편집" onAction={() => router.navigate('/favorites')} />
+        <View style={styles.favorites}>
+          <SectionHeader title="즐겨찾기" actionLabel="편집" onAction={() => router.push('/favorites')} />
           {favorites.length ? (
-            <View style={styles.shortcutRow}>
+            <View style={styles.favRow}>
               {favorites.slice(0, 4).map((app) => (
                 <Pressable
                   key={app.id}
-                  style={styles.shortcut}
+                  style={styles.fav}
                   onPress={() => void launchApp(app)}
                   onLongPress={() => router.push({ pathname: '/app/[id]', params: { id: app.id } })}
                   accessibilityRole="button"
                   accessibilityLabel={`${app.displayName} 열기`}
                   accessibilityHint="길게 누르면 앱 정보를 볼 수 있어요"
                 >
-                  <AppIcon app={app} size={40} />
-                  <Text style={[styles.shortcutLabel, { color: c.textSecondary }]} numberOfLines={1}>
+                  <AppIcon app={app} size={56} />
+                  <Text style={[styles.favLabel, { color: c.textSecondary }]} numberOfLines={1}>
                     {app.displayName}
                   </Text>
                 </Pressable>
@@ -117,15 +113,21 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 20, paddingTop: 28, paddingBottom: 24 },
-  greeting: { marginBottom: 20 },
-  rows: { gap: 9, marginTop: 20 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 14, height: 50, borderRadius: 14, paddingHorizontal: 16 },
-  rowIcon: { width: 28, height: 28 },
-  shortcuts: { marginTop: 28 },
-  shortcutRow: { flexDirection: 'row' },
-  shortcut: { width: '25%', alignItems: 'center', gap: 6 },
-  shortcutLabel: { fontFamily: fonts.medium, fontSize: 11, maxWidth: 72 },
+  content: { paddingHorizontal: 20, paddingTop: 26, paddingBottom: 28 },
+  hello: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  sun: { width: 22, height: 22 },
+  helloText: { fontFamily: fonts.semibold, fontSize: 14.5, letterSpacing: -0.3 },
+  headline: { marginTop: 18, marginBottom: 22 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12, marginTop: 22 },
+  quick: { width: '48%', height: 66, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, gap: 12 },
+  quickIcon: { width: 36, height: 36 },
+  quickText: { fontFamily: fonts.bold, fontSize: 15, letterSpacing: -0.4 },
+  quickMore: { justifyContent: 'center', gap: 4 },
+  moreText: { fontFamily: fonts.semibold, fontSize: 15 },
+  favorites: { marginTop: 30 },
+  favRow: { flexDirection: 'row' },
+  fav: { width: '25%', alignItems: 'center', gap: 8 },
+  favLabel: { fontFamily: fonts.medium, fontSize: 12, maxWidth: 76 },
   hint: { fontFamily: fonts.regular, fontSize: 13 },
   emptyAction: { alignSelf: 'stretch', marginTop: 12 },
 });

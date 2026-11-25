@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppIcon } from '@/components/AppIcon';
-import { Screen } from '@/components/Screen';
+import { Screen, ScreenHeader } from '@/components/Screen';
 import { EmptyState, SectionHeader } from '@/components/ui';
 import { Icon } from '@/design-system/Icon';
 import { useColors } from '@/design-system/theme';
-import { fonts, type } from '@/design-system/tokens';
+import { fonts } from '@/design-system/tokens';
 import type { AppEntry } from '@/domain/apps/app.types';
 import { useAppDeck } from '@/features/app-data/AppDeckProvider';
 
@@ -78,21 +78,24 @@ export default function FavoritesTab() {
   };
 
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.titleRow}>
-          <Text style={[type.title, { color: c.text }]} accessibilityRole="header">
-            즐겨찾기
-          </Text>
+    <Screen tab="home">
+      <ScreenHeader
+        title="즐겨찾기"
+        right={
           <Pressable
             onPress={() => setEditing((v) => !v)}
             hitSlop={10}
             accessibilityRole="button"
-            style={[styles.tag, { backgroundColor: editing ? c.primary : c.surfaceMuted }]}
+            style={[styles.tag, { backgroundColor: editing ? c.primary : c.accentSoft }]}
           >
-            <Text style={[styles.tagText, { color: editing ? c.onPrimary : c.textSecondary }]}>{editing ? '완료' : '편집'}</Text>
+            <Text style={[styles.tagText, { color: editing ? c.onPrimary : c.icon }]}>{editing ? '완료' : '편집'}</Text>
           </Pressable>
-        </View>
+        }
+      />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={[styles.hint, { color: c.textTertiary }]}>
+          {editing ? '× 로 즐겨찾기를 해제하고, ‹ › 로 순서를 바꿔요.' : '홈 화면 즐겨찾기에는 앞의 4개가 보여요. 앱 정보 화면의 ☆로 추가할 수 있어요.'}
+        </Text>
 
         {favorites.length ? (
           <View style={styles.grid}>
@@ -136,8 +139,8 @@ export default function FavoritesTab() {
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 16, paddingBottom: 24 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 4, paddingTop: 18, paddingBottom: 18 },
-  tag: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8 },
+  hint: { fontFamily: fonts.regular, fontSize: 12.5, lineHeight: 18, paddingHorizontal: 4, marginBottom: 18 },
+  tag: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
   tagText: { fontFamily: fonts.semibold, fontSize: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 18 },
   cell: { width: '25%', alignItems: 'center' },

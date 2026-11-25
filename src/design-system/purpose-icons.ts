@@ -1,11 +1,12 @@
-/** 레퍼런스 디자인에서 추출한 컬러 목적 아이콘 (scripts/extract-reference-icons.mjs) */
-export const PURPOSE_ICONS: Record<string, number> = {
-  delivery: require('@/assets/icons/purpose-delivery.png'),
-  directions: require('@/assets/icons/purpose-directions.png'),
-  ott: require('@/assets/icons/purpose-ott.png'),
-  shopping: require('@/assets/icons/purpose-shopping.png'),
-  movie: require('@/assets/icons/purpose-movie.png'),
-  cleanup: require('@/assets/icons/purpose-cleanup.png'),
+/** 레퍼런스 v2에서 추출한 이미지 (scripts/extract-reference-icons.mjs) */
+export const QUICK_ICONS = {
+  delivery: require('@/assets/icons/quick-delivery.png') as number,
+  directions: require('@/assets/icons/quick-maps.png') as number,
+  ott: require('@/assets/icons/quick-ott.png') as number,
+  shopping: require('@/assets/icons/quick-shopping.png') as number,
+  transport: require('@/assets/icons/quick-transport.png') as number,
 };
 
-export const SPARKLE_ICON: number = require('@/assets/icons/sparkle.png');
+export const SUN_ICON: number = require('@/assets/icons/sun.png');
+export const CLEANUP_ILLUSTRATION: number = require('@/assets/icons/illust-cleanup.png');
+export const SPLASH_CITY: number = require('@/assets/brand/splash-city.jpg');

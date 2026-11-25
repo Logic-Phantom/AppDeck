@@ -1,17 +1,36 @@
-import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
+import { useId } from 'react';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { useColors } from './theme';
-import { radius } from './tokens';
+import { cardShadow } from './tokens';
 
-/** 앱덱 심볼: 두꺼운 Λ 형태의 "A" */
-export function BrandMark({ size = 40, color }: { size?: number; color: string }) {
+/** SVG id는 웹 DOM에서 전역이라 인스턴스마다 고유해야 한다 */
+export function useSvgId(prefix: string): string {
+  return `${prefix}${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+}
+
+/** 앱덱 심볼 v2: 두 개의 둥근 획으로 만든 Λ (블루 → 바이올렛 그라데이션) */
+export function BrandMark({ size = 48 }: { size?: number }) {
+  const id = useSvgId('bm');
   return (
-    <Svg width={size} height={size} viewBox="0 0 48 48">
-      <Path
-        d="M20.6 7.6a3.9 3.9 0 0 1 6.8 0l15.3 27.6a2.6 2.6 0 0 1-2.3 3.9h-6.2a2.6 2.6 0 0 1-2.3-1.4L24 21.4l-7.9 16.3a2.6 2.6 0 0 1-2.3 1.4H7.6a2.6 2.6 0 0 1-2.3-3.9z"
-        fill={color}
-      />
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Defs>
+        <LinearGradient id={`${id}r`} x1="0.2" y1="0" x2="0.8" y2="1">
+          <Stop offset="0" stopColor="#3A74F2" />
+          <Stop offset="0.7" stopColor="#3F50E6" />
+          <Stop offset="1" stopColor="#8A5CF6" />
+        </LinearGradient>
+        <LinearGradient id={`${id}l`} x1="0.6" y1="0" x2="0.3" y2="1">
+          <Stop offset="0" stopColor="#7CC0FF" />
+          <Stop offset="0.45" stopColor="#3D86F7" />
+          <Stop offset="1" stopColor="#2457E8" />
+        </LinearGradient>
+      </Defs>
+      {/* 오른쪽 획 */}
+      <Path d="M50 22 L78 76" stroke={`url(#${id}r)`} strokeWidth={21} strokeLinecap="round" />
+      {/* 왼쪽 획 */}
+      <Path d="M50 22 L22 76" stroke={`url(#${id}l)`} strokeWidth={21} strokeLinecap="round" />
     </Svg>
   );
 }
@@ -22,74 +41,85 @@ export function BrandTile({ size = 80 }: { size?: number }) {
     <View
       style={[
         styles.tile,
-        {
-          width: size,
-          height: size,
-          borderRadius: size * 0.28,
-          backgroundColor: c.brandTile,
-          shadowColor: c.scheme === 'dark' ? '#000' : '#2A3A8A',
-        },
+        cardShadow(c, 2),
+        { width: size, height: size, borderRadius: size * 0.28, backgroundColor: c.brandTile, borderColor: c.glassBorder },
       ]}
     >
-      <BrandMark size={size * 0.58} color={c.brandMark} />
+      <BrandMark size={size * 0.72} />
     </View>
   );
 }
 
-/** 스플래시 하단의 블루 그라데이션 물결 */
-export function SplashWave({ width, height }: { width: number; height: number }) {
+/** 화면 전체 배경: 라벤더 화이트 세로 그라데이션 */
+export function Backdrop({ style }: { style?: StyleProp<ViewStyle> }) {
+  const c = useColors();
+  const id = useSvgId('bd');
   return (
-    <Svg width={width} height={height} viewBox="0 0 400 260" preserveAspectRatio="none">
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, style]}>
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={c.bgTop} />
+            <Stop offset="1" stopColor={c.bgBottom} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${id})`} />
+      </Svg>
+    </View>
+  );
+}
+
+/** 하단 블루 물결 (검색 결과·브랜드 카드) */
+export function BottomWave({ width, height, intensity = 1 }: { width: number; height: number; intensity?: number }) {
+  const c = useColors();
+  const id = useSvgId('wv');
+  return (
+    <Svg width={width} height={height} viewBox="0 0 400 200" preserveAspectRatio="none">
       <Defs>
-        <LinearGradient id="wave1" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#C9D3FF" stopOpacity="0.2" />
-          <Stop offset="1" stopColor="#6D7BFF" stopOpacity="0.9" />
+        <LinearGradient id={`${id}a`} x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor={c.waveA} stopOpacity={0.15 * intensity} />
+          <Stop offset="1" stopColor={c.waveB} stopOpacity={0.75 * intensity} />
         </LinearGradient>
-        <LinearGradient id="wave2" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#8FA2FF" stopOpacity="0.55" />
-          <Stop offset="1" stopColor="#3D4FE8" stopOpacity="1" />
+        <LinearGradient id={`${id}b`} x1="0" y1="0" x2="1" y2="0">
+          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0} />
+          <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0.7} />
         </LinearGradient>
       </Defs>
-      <Path d="M0 210C90 200 170 150 250 95 310 55 360 40 400 40V260H0z" fill="url(#wave1)" />
-      <Path d="M90 260C170 230 240 180 300 130 340 100 370 90 400 88V260z" fill="url(#wave2)" />
+      <Path d="M0 150C100 120 190 60 290 70 340 75 375 60 400 40V200H0z" fill={`url(#${id}a)`} />
+      <Path d="M40 200C130 150 230 110 400 120" stroke={`url(#${id}b)`} strokeWidth={2} fill="none" />
+      <Path d="M0 180C120 150 250 130 400 150" stroke={`url(#${id}b)`} strokeWidth={1.5} fill="none" />
     </Svg>
   );
 }
 
-/** 정리 완료 일러스트: 연보라 폴더 + 체크 배지 */
-export function CleanupDoneIllustration({ size = 120 }: { size?: number }) {
+/** 브랜드 카드 배경: 대각선 글래스 리본 */
+export function RibbonBackdrop({ width, height }: { width: number; height: number }) {
+  const c = useColors();
+  const id = useSvgId('rb');
   return (
-    <Svg width={size} height={size} viewBox="0 0 120 120">
+    <Svg width={width} height={height} viewBox="0 0 300 600" preserveAspectRatio="none">
       <Defs>
-        <LinearGradient id="folderBack" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#DCE2FF" />
-          <Stop offset="1" stopColor="#C5CEFA" />
+        <LinearGradient id={`${id}bg`} x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor={c.bgTop} />
+          <Stop offset="1" stopColor={c.scheme === 'dark' ? '#151A3A' : '#E3E8FF'} />
         </LinearGradient>
-        <LinearGradient id="folderFront" x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor="#EEF1FF" />
-          <Stop offset="1" stopColor="#C9D1FB" />
+        <LinearGradient id={`${id}r`} x1="0" y1="0" x2="1" y2="1">
+          <Stop offset="0" stopColor="#FFFFFF" stopOpacity={c.scheme === 'dark' ? 0.05 : 0.9} />
+          <Stop offset="1" stopColor={c.waveA} stopOpacity={0.5} />
         </LinearGradient>
+        <RadialGradient id={`${id}g`} cx="0.85" cy="0.95" r="0.6">
+          <Stop offset="0" stopColor={c.waveB} stopOpacity={0.85} />
+          <Stop offset="1" stopColor={c.waveB} stopOpacity={0} />
+        </RadialGradient>
       </Defs>
-      <G>
-        <Path d="M18 30a6 6 0 0 1 6-6h22l8 8h40a6 6 0 0 1 6 6v8H18z" fill="url(#folderBack)" />
-        <Rect x={14} y={40} width={92} height={58} rx={9} fill="url(#folderFront)" />
-        <Rect x={44} y={60} width={14} height={4} rx={2} fill="#B5BEF0" />
-        <Path d="M84 22l4 4 8-9" stroke="#5B72F2" strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-        <Circle cx={86} cy={88} r={17} fill="#1A1D29" />
-        <Path d="M78.5 88l5 5 10-10.5" stroke="#FFFFFF" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </G>
+      <Rect width="300" height="600" fill={`url(#${id}bg)`} />
+      <Path d="M-20 120C80 60 180 40 320 0V180C200 200 90 240-20 330z" fill={`url(#${id}r)`} />
+      <Path d="M-20 420C100 380 200 330 320 260V600H-20z" fill={`url(#${id}g)`} />
     </Svg>
   );
 }
 
 const styles = StyleSheet.create({
-  tile: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6,
-    borderRadius: radius.xl,
-  },
+  tile: { alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
 });
+

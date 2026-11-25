@@ -6,10 +6,11 @@ APPDECK은 기존 프로젝트(구도픽·MoodMix·CutPick)의 **Expo SDK 58 + E
 ```text
 src/
 ├─ app/                 Expo Router 화면 (UI만, 비즈니스 로직 없음)
-│  ├─ (tabs)/           홈 · 검색(앱 보관함) · 즐겨찾기 · 설정  ← 레퍼런스 하단 4탭
-│  ├─ results.tsx       목적/카테고리 검색 결과 (전체 / 배달앱 / 음식점 탭)
-│  ├─ cleanup.tsx       앱 정리 (링 차트 + 정리 후보)
-│  ├─ cleanup-done.tsx  정리 완료
+│  ├─ (tabs)/           홈 · 검색 · 보관함 · 설정  ← 레퍼런스 v2 하단 4탭
+│  ├─ results.tsx       목적/카테고리 검색 결과 (features/search/SearchView 공유)
+│  ├─ categories.tsx    카테고리 그룹 탭 + 3D 아이콘 카드
+│  ├─ favorites.tsx     즐겨찾기 편집
+│  ├─ cleanup.tsx       앱 정리 안내 → cleanup-select.tsx(고르기) → cleanup-done.tsx
 │  ├─ parking*.tsx      주차 위치 메모
 │  ├─ app/[id].tsx      앱 상세 (분류·별칭·즐겨찾기·숨김·정리 후보)
 │  ├─ add-app.tsx       수동 등록 (iOS 기본 경로)
