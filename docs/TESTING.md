@@ -26,7 +26,8 @@
 | 린트 | `npx expo lint` | ✅ 0건 |
 | 단위/통합 테스트 | `npx jest` | ✅ 7개 스위트, 55개 테스트 통과 (카테고리 v2 10개 추가) |
 | 웹 미리보기 (390×800) | 내장 브라우저 | ✅ 스플래시·브랜드 카드·온보딩·홈·카테고리(스크롤)·검색 결과·보관함·앱 정리·정리 고르기·설정 화면 확인, 중첩 버튼 0, 콘솔 오류 0 |
-| Android APK | — | ⏳ 디자인 v2로 다시 빌드하지 않음 (이전 APK는 v1 디자인) |
+| EAS Build `preview` (Android APK) | `eas build -p android --profile preview` | ✅ 성공 — 빌드 ID `5ec7b441-6ba2-4479-bf1a-0922d2b26545`, `app.appdeck.mobile` v0.1.0, `QUERY_ALL_PACKAGES` 포함, JS 번들에 v2 에셋·카테고리 포함 확인 (첫 업로드는 네트워크 ECONNRESET으로 실패 후 재시도 성공) |
+| Android 실기기 | — | ⏳ 사용자가 별도로 검증 예정 |
 
 ## 2026-11-24 — Android 빌드
 

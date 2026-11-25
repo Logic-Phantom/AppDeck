@@ -99,6 +99,7 @@ npm run doctor
 - 카테고리 15 → 20개: 여행·숙박(기차·버스·항공·숙소 예약), 공과금·세금, 뉴스·웹툰·책, 건강·운동, 교육·학습 추가 / 메신저에 문자(SMS) 포함 / 시스템 도구 → 유틸리티 / 분류 규칙 v2(패키지·이름 패턴 대폭 확장, 최장 일치)
 - 목적 검색 19종(교통·이동, 여행·숙박, 공과금·세금, 게임, 뉴스·웹툰, 건강, 생활, 공부, 유틸리티 추가)
 - 테스트 55개 통과(카테고리 v2 10개 추가), 웹 미리보기로 전 화면 확인
+- **EAS preview APK 재빌드** → `appdeck-v0.1.0-design-v2.apk` (빌드 `5ec7b441`, 새 디자인·카테고리 포함 확인). 실기기 검증은 사용자가 별도로 진행
 
 ### 2026-11-24 — Android 빌드 환경 · EAS APK
 - 빌드 도구 설치: Microsoft OpenJDK 17(포터블, `C:\Android\jdk-17`), Android SDK(`C:\Android\Sdk`: platform-tools, platforms;android-37.0, build-tools 37.0.0, NDK 27.1, CMake 3.22.1), 공식 체크섬 확인
