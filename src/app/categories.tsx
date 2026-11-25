@@ -35,6 +35,7 @@ export default function CategoriesScreen() {
       <View style={styles.tabs}>
         <PillTabs<GroupTab> tabs={[{ key: 'all', label: '전체' }, ...CATEGORY_GROUPS.map((g) => ({ key: g.id, label: g.name }))]} value={group} onChange={setGroup} />
       </View>
+      <Text style={[styles.hint, { color: c.textTertiary }]}>카테고리를 열고 ‘편집’을 누르면 앱을 넣거나 뺄 수 있어요.</Text>
       <ScrollView contentContainerStyle={styles.grid}>
         {list.map((cat) => {
           const count = counts.get(cat.id) ?? 0;
@@ -66,7 +67,8 @@ export default function CategoriesScreen() {
 }
 
 const styles = StyleSheet.create({
-  tabs: { marginBottom: 16 },
+  tabs: { marginBottom: 10 },
+  hint: { fontFamily: fonts.medium, fontSize: 12, paddingHorizontal: 22, marginBottom: 12 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 14, paddingHorizontal: 18, paddingBottom: 32 },
   card: { width: '48%', alignItems: 'center', paddingTop: 18, paddingBottom: 18, paddingHorizontal: 10, borderRadius: 22 },
   iconWrap: { height: 80, justifyContent: 'center' },

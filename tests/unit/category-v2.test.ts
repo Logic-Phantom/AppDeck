@@ -19,6 +19,24 @@ describe('카테고리 v2', () => {
     expect(cat('com.tmoney.tmoneygo', '티머니GO')).toBe('transport_mobility');
   });
 
+  it('써브웨이(SUBWAY)는 샌드위치 브랜드라 음식점·카페로 분류된다', () => {
+    expect(cat('com.subway.mobile.subwayapp03', 'Subway')).toBe('food_dining');
+    expect(cat('kr.co.subway.app', '써브웨이')).toBe('food_dining');
+    expect(classifyApp({ displayName: '서브웨이' }).categoryId).toBe('food_dining');
+  });
+
+  it('지하철 앱은 교통으로 분류된다', () => {
+    expect(cat('com.imagedrome.jihachul', '지하철 종결자')).toBe('transport_mobility');
+    expect(cat('kr.co.seoulmetro.smartapp', '또타지하철')).toBe('transport_mobility');
+    expect(classifyApp({ displayName: '지하철 노선도' }).categoryId).toBe('transport_mobility');
+  });
+
+  it('짧은 단어가 다른 앱 이름에 섞여 잘못 분류되지 않는다', () => {
+    expect(cat('com.example.pancakemaker', 'Pancake Maker')).not.toBe('education');
+    expect(cat('com.example.webshop', 'Web Shop')).not.toBe('education');
+    expect(cat('com.example.bluetoothspeaker', 'Speaker Boost')).not.toBe('education');
+  });
+
   it('메신저에 문자(SMS) 앱이 포함된다', () => {
     expect(cat('com.samsung.android.messaging', '메시지')).toBe('messaging_social');
     expect(cat('com.google.android.apps.messaging', 'Messages')).toBe('messaging_social');

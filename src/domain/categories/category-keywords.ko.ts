@@ -8,7 +8,7 @@ import type { AppCategoryId } from './category.types';
  * 여러 규칙이 맞으면 가장 긴(구체적인) 패턴이 이긴다. 예: tmoneybus(여행) > tmoney(교통)
  * 규칙이 바뀌면 RULES_VERSION을 올린다. 재분류 시에도 사용자 지정 분류는 보존된다.
  */
-export const RULES_VERSION = 2;
+export const RULES_VERSION = 3;
 
 export interface CategoryRule {
   categoryId: AppCategoryId;
@@ -24,8 +24,8 @@ export const CATEGORY_RULES: readonly CategoryRule[] = [
   },
   {
     categoryId: 'food_dining',
-    packagePatterns: ['starbucks', 'mcdonalds', 'burgerking', 'lotteria', 'catchtable', 'tabling', 'ediya', 'twosome', 'megacoffee', 'baskin', 'dunkin', 'paris', 'compose', 'hollys', 'paikdabang'],
-    nameKeywords: ['스타벅스', '맥도날드', '버거', '커피', '카페', '캐치테이블', '테이블링', '식당', '레스토랑', '베이커리', 'coffee', 'cafe'],
+    packagePatterns: ['starbucks', 'mcdonalds', 'burgerking', 'lotteria', 'catchtable', 'tabling', 'ediya', 'twosome', 'megacoffee', 'baskin', 'dunkin', 'parisbaguette', 'composecoffee', 'hollys', 'paikdabang', 'subway', 'kfc', 'momstouch', 'outback', 'vips'],
+    nameKeywords: ['스타벅스', '맥도날드', '써브웨이', '서브웨이', 'subway', '버거', '커피', '카페', '캐치테이블', '테이블링', '식당', '레스토랑', '베이커리', 'coffee', 'cafe'],
   },
   {
     categoryId: 'maps_navigation',
@@ -34,8 +34,8 @@ export const CATEGORY_RULES: readonly CategoryRule[] = [
   },
   {
     categoryId: 'transport_mobility',
-    packagePatterns: ['kakao.taxi', 'kakaot', 'uber', 'tada', 'socar', 'greencar', 'tmoney', 'kakaobus', 'subway', 'metro', 'iparking', 'parking', 'evcharg', 'hipass', 'kickboard', 'gcoo'],
-    nameKeywords: ['택시', '버스', '지하철', '카셰어', '쏘카', '주차', '전기차', '충전', '킥보드', '하이패스', '교통', 'taxi', 'metro'],
+    packagePatterns: ['kakao.taxi', 'kakaot', 'uber', 'tada', 'socar', 'greencar', 'tmoney', 'kakaobus', 'jihachul', 'subwaykorea', 'subwaymap', 'seoulmetro', 'iparking', 'parking', 'evcharg', 'hipass', 'kickboard', 'gcoo'],
+    nameKeywords: ['택시', '버스', '지하철', '카셰어', '쏘카', '주차', '전기차', '충전', '킥보드', '하이패스', '교통', '지하철노선', 'subwaykorea', 'subwaymap', 'taxi', 'metro'],
   },
   {
     categoryId: 'travel_booking',
@@ -118,7 +118,7 @@ export const CATEGORY_RULES: readonly CategoryRule[] = [
   },
   {
     categoryId: 'education',
-    packagePatterns: ['duolingo', 'classting', 'ebs', 'megastudy', 'speak', 'quizlet', 'santa', 'cake', 'class101', 'mathpresso', 'qanda', 'inflearn', 'coursera', 'udemy'],
+    packagePatterns: ['duolingo', 'classting', 'co.ebs', 'kr.ebs', 'megastudy', 'speakapp', 'quizlet', 'riiid', 'cakeenglish', 'class101', 'mathpresso', 'qanda', 'inflearn', 'coursera', 'udemy'],
     nameKeywords: ['교육', '학습', '영어', '단어', '강의', '클래스', '공부', '듀오링고', '콴다', 'ebs', 'study'],
   },
   {

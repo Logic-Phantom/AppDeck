@@ -47,6 +47,8 @@ interface AppDeckContextValue {
   updateApp(id: string, patch: Partial<AppEntry>): Promise<void>;
   toggleFavorite(id: string): Promise<void>;
   setCategory(id: string, categoryId: AppCategoryId | null): Promise<void>;
+  /** 여러 앱의 분류를 한 번에 바꾼다. null이면 자동 분류로 되돌린다. 다음 스캔에서도 유지된다. */
+  setCategoryMany(ids: string[], categoryId: AppCategoryId | null): Promise<void>;
   setCleanupCandidate(ids: string[], value: boolean, reason?: CleanupReason): Promise<void>;
   addManualApp(input: ManualAppInput): Promise<AppEntry>;
   deleteApp(id: string): Promise<void>;
@@ -239,6 +241,16 @@ export function AppDeckProvider({ children }: { children: ReactNode }) {
       },
       async setCategory(id, categoryId) {
         await updateApp(id, { userCategoryId: categoryId });
+      },
+      async setCategoryMany(ids, categoryId) {
+        if (!ids.length) return;
+        const now = new Date().toISOString();
+        const changed = stateRef.current.apps
+          .filter((a) => ids.includes(a.id))
+          .map((a) => ({ ...a, userCategoryId: categoryId, updatedAt: now }));
+        const map = new Map(changed.map((a) => [a.id, a]));
+        commit({ ...stateRef.current, apps: stateRef.current.apps.map((a) => map.get(a.id) ?? a) });
+        await repo.saveApps(changed);
       },
       async setCleanupCandidate(ids, value, reason = 'manual') {
         const now = new Date().toISOString();

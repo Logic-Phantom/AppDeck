@@ -2,7 +2,9 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
+import { AppIcon } from '@/components/AppIcon';
 import { AppListRow } from '@/components/AppListRow';
+import { AppPickerSheet, CategoryPickerSheet } from '@/components/CategorySheets';
 import { Screen } from '@/components/Screen';
 import { SearchField } from '@/components/SearchField';
 import { EmptyState, GlassCard, PillButton, PillTabs, SoftButton } from '@/components/ui';
@@ -34,12 +36,17 @@ export function SearchView({ mode, initialQuery, intentId, categoryId }: Props) 
   const c = useColors();
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const { visibleApps, capabilities } = useAppDeck();
+  const { visibleApps, capabilities, setCategoryMany, showToast } = useAppDeck();
   const presetIntent = intentId ? findPurposeIntent(intentId) : undefined;
   const presetLabel = categoryId ? getCategory(categoryId).name : (presetIntent?.label ?? '');
   const [query, setQuery] = useState(initialQuery ?? presetLabel);
   const [tab, setTab] = useState<AppCategoryId | 'all'>('all');
   const [expanded, setExpanded] = useState(false);
+  // 카테고리 편집 모드 (카테고리 화면에서 들어온 경우만)
+  const categoryMode = !!categoryId && query === presetLabel;
+  const [editing, setEditing] = useState(false);
+  const [moving, setMoving] = useState<AppEntry | null>(null);
+  const [adding, setAdding] = useState(false);
 
   const result = useMemo(() => {
     if (categoryId && query === presetLabel) {
@@ -55,7 +62,25 @@ export function SearchView({ mode, initialQuery, intentId, categoryId }: Props) 
     ...(result.categories.length > 1 ? result.categories.map((id) => ({ key: id, label: getCategory(id).shortName })) : []),
   ];
   const filtered = tab === 'all' ? result.hits.map((h) => h.app) : result.hits.map((h) => h.app).filter((a) => effectiveCategory(a) === tab);
-  const shown = expanded ? filtered : filtered.slice(0, COLLAPSED_COUNT);
+  const isEditing = categoryMode && editing;
+  const shown = expanded || isEditing ? filtered : filtered.slice(0, COLLAPSED_COUNT);
+  const addCandidates = useMemo(
+    () => (categoryId ? visibleApps.filter((a) => effectiveCategory(a) !== categoryId) : []),
+    [visibleApps, categoryId],
+  );
+
+  const moveApp = async (app: AppEntry, target: AppCategoryId | null) => {
+    setMoving(null);
+    await setCategoryMany([app.id], target);
+    showToast(target ? `${app.displayName} → ${getCategory(target).name}(으)로 옮겼어요.` : `${app.displayName}을(를) 자동 분류로 되돌렸어요.`);
+  };
+
+  const addApps = async (ids: string[]) => {
+    if (!categoryId) return;
+    setAdding(false);
+    await setCategoryMany(ids, categoryId);
+    showToast(`${ids.length}개 앱을 ${getCategory(categoryId).name}에 넣었어요.`);
+  };
 
   // 분류별 섹션 (목적에 연결된 분류 먼저)
   const rows: Row[] = useMemo(() => {
@@ -98,14 +123,44 @@ export function SearchView({ mode, initialQuery, intentId, categoryId }: Props) 
             autoFocus={mode === 'tab'}
           />
         </View>
-        <Pressable
-          onPress={() => (mode === 'results' ? (router.canGoBack() ? router.back() : router.replace('/')) : setQuery(''))}
-          hitSlop={10}
-          accessibilityRole="button"
-        >
-          <Text style={[styles.cancel, { color: c.textSecondary }]}>취소</Text>
-        </Pressable>
+        {categoryMode ? (
+          <Pressable
+            onPress={() => setEditing((v) => !v)}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={editing ? '카테고리 편집 완료' : '카테고리 편집'}
+            style={[styles.editBtn, { backgroundColor: editing ? c.primary : c.accentSoft }]}
+          >
+            <Text style={[styles.editText, { color: editing ? c.onPrimary : c.icon }]}>{editing ? '완료' : '편집'}</Text>
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={() => (mode === 'results' ? (router.canGoBack() ? router.back() : router.replace('/')) : setQuery(''))}
+            hitSlop={10}
+            accessibilityRole="button"
+          >
+            <Text style={[styles.cancel, { color: c.textSecondary }]}>취소</Text>
+          </Pressable>
+        )}
       </View>
+
+      {isEditing ? (
+        <View style={styles.editHead}>
+          <GlassCard style={styles.addCard} onPress={() => setAdding(true)} accessibilityLabel="이 카테고리에 앱 넣기">
+            <View style={[styles.addIcon, { backgroundColor: c.accentSoft }]}>
+              <Icon name="plus" size={20} color={c.accent} strokeWidth={2.4} />
+            </View>
+            <View style={styles.addTexts}>
+              <Text style={[styles.addTitle, { color: c.text }]}>이 카테고리에 앱 넣기</Text>
+              <Text style={[styles.addSub, { color: c.textSecondary }]}>다른 카테고리에 있는 앱을 골라 옮겨요</Text>
+            </View>
+            <Icon name="chevron-right" size={16} color={c.icon} strokeWidth={2.2} />
+          </GlassCard>
+          <Text style={[styles.editNote, { color: c.textTertiary }]}>
+            ‘빼기’를 누르면 옮길 카테고리를 고를 수 있어요. 직접 바꾼 분류는 앱 목록을 새로 불러와도 그대로 유지돼요.
+          </Text>
+        </View>
+      ) : null}
 
       {browsing ? (
         <View style={styles.browse}>
@@ -161,6 +216,28 @@ export function SearchView({ mode, initialQuery, intentId, categoryId }: Props) 
         renderItem={({ item }) =>
           item.kind === 'header' ? (
             <Text style={[styles.groupTitle, { color: c.text }]}>{item.title}</Text>
+          ) : isEditing ? (
+            <View style={styles.editRow}>
+              <AppIcon app={item.app} size={46} />
+              <View style={styles.editTexts}>
+                <Text style={[styles.editName, { color: c.text }]} numberOfLines={1}>
+                  {item.app.displayName}
+                </Text>
+                <Text style={[styles.editSub, { color: item.app.userCategoryId ? c.accent : c.textTertiary }]}>
+                  {item.app.userCategoryId ? '직접 넣은 앱' : '자동 분류'}
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => setMoving(item.app)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={`${item.app.displayName} 이 카테고리에서 빼기`}
+                style={({ pressed }) => [styles.removeBtn, { backgroundColor: pressed ? c.surfacePressed : c.surfaceMuted, borderColor: c.danger }]}
+              >
+                <Icon name="close" size={13} color={c.danger} strokeWidth={2.4} />
+                <Text style={[styles.removeText, { color: c.danger }]}>빼기</Text>
+              </Pressable>
+            </View>
           ) : (
             <AppListRow app={item.app} />
           )
@@ -189,7 +266,7 @@ export function SearchView({ mode, initialQuery, intentId, categoryId }: Props) 
         ListFooterComponent={
           browsing ? undefined : (
             <View style={styles.footer}>
-              {!expanded && filtered.length > COLLAPSED_COUNT ? (
+              {!expanded && !isEditing && filtered.length > COLLAPSED_COUNT ? (
                 <PillButton label="더보기" icon="chevron-down" onPress={() => setExpanded(true)} />
               ) : null}
               {isDirections ? (
@@ -203,6 +280,27 @@ export function SearchView({ mode, initialQuery, intentId, categoryId }: Props) 
           )
         }
       />
+
+      {categoryId ? (
+        <>
+          <CategoryPickerSheet
+            visible={!!moving}
+            title={moving ? `${moving.displayName}을(를) 어디로 옮길까요?` : ''}
+            subtitle={`${getCategory(categoryId).name}에서 빠지고 고른 카테고리로 옮겨져요.`}
+            excludeId={categoryId}
+            showAutoReset={!!moving?.userCategoryId && moving.suggestedCategoryId !== categoryId}
+            onPick={(target) => moving && void moveApp(moving, target)}
+            onClose={() => setMoving(null)}
+          />
+          <AppPickerSheet
+            visible={adding}
+            categoryId={categoryId}
+            apps={addCandidates}
+            onConfirm={(ids) => void addApps(ids)}
+            onClose={() => setAdding(false)}
+          />
+        </>
+      ) : null}
     </Screen>
   );
 }
@@ -211,6 +309,21 @@ const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 12 },
   field: { flex: 1 },
   cancel: { fontFamily: fonts.semibold, fontSize: 14.5 },
+  editBtn: { paddingHorizontal: 14, height: 34, borderRadius: 999, justifyContent: 'center' },
+  editText: { fontFamily: fonts.bold, fontSize: 13.5 },
+  editHead: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 8, gap: 10 },
+  addCard: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  addIcon: { width: 40, height: 40, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  addTexts: { flex: 1, gap: 2 },
+  addTitle: { fontFamily: fonts.bold, fontSize: 15 },
+  addSub: { fontFamily: fonts.medium, fontSize: 12.5 },
+  editNote: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 17 },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 22, paddingVertical: 9 },
+  editTexts: { flex: 1, gap: 3 },
+  editName: { fontFamily: fonts.bold, fontSize: 15.5, letterSpacing: -0.3 },
+  editSub: { fontFamily: fonts.medium, fontSize: 12.5 },
+  removeBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, height: 34, borderRadius: 999, borderWidth: 1 },
+  removeText: { fontFamily: fonts.bold, fontSize: 13 },
   tabsWrap: { marginBottom: 14 },
   list: { paddingBottom: 40 },
   groupTitle: { fontFamily: fonts.bold, fontSize: 16, paddingHorizontal: 22, marginTop: 10, marginBottom: 6, letterSpacing: -0.3 },

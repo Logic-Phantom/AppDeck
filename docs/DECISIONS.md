@@ -50,6 +50,9 @@
 교통(시내 이동: 택시·지하철·시내버스·주차·킥보드)과 여행(기차·고속/시외버스·항공·숙박)을 분리했다. 같은 패키지가 여러 규칙에 맞으면 가장 긴 패턴이 이긴다(예: `tmoneybus` → 여행, `tmoney` → 교통).
 레퍼런스에 3D 아이콘이 없는 14개 카테고리는 같은 톤의 광택 SVG(`src/design-system/CategoryIcon.tsx`)로 그렸다.
 
+## ADR-013 카테고리 직접 편집
+카테고리 결과 화면의 `편집` 모드에서 앱을 넣고 뺀다. 넣기/빼기는 모두 앱의 `userCategoryId`를 바꾸는 것이며(한 앱은 한 카테고리), 자동 분류보다 항상 우선하고 스캔으로 덮어쓰지 않는다. 직접 넣은 앱은 `자동 분류로 되돌리기`로 `userCategoryId`를 지울 수 있다.
+
 ## ADR-009 Android 빌드는 EAS 클라우드 (Windows 로컬은 보조)
 작업 PC 경로에 한글이 있고 Windows 긴 경로 지원이 꺼져 있어 로컬 Gradle/CMake 빌드가 실패한다.
 `eas build -p android --profile preview` (APK, EAS 관리 서명 키)를 기본 경로로 쓴다.
